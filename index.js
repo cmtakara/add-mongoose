@@ -215,7 +215,7 @@ app.put('/api/fruits/:id', async (req, res) => {
                 { new: true },
             )
             console.log(updatedFruit);
-            res.redirect('/api/fruits');
+            res.redirect(`/api/fruits/${req.params.id}`);
         } catch (err) {
             res.send(err).status(400);
         }
@@ -293,15 +293,21 @@ app.get('/fruits/:id/edit', async (req, res) => {
 // SHOW
 // another version of READ is called a show route
 // in this one, we can see more information on an idividual piece of data
-app.get('/api/fruits/:id', (req, res) => {
+app.get('/api/fruits/:id', async (req, res) => {
     // in this case, my unique identifier is going to be the array index
     // res.send(`<div>${req.params.id}</div>`)
     // this id can be anything, so i probably want to do some checking
     // before accessing the array
-    if (req.params.id >= 0 && req.params.id < fruits.length) {
-        res.json(fruits[req.params.id]);
-    } else {
-        res.send('<p>That is not a valid id</p>')
+    // if (req.params.id >= 0 && req.params.id < fruits.length) {
+    //     res.json(fruits[req.params.id]);
+    // } else {
+    //     res.send('<p>That is not a valid id</p>')
+    // }
+    try {
+        const foundFruit = await Fruit.findById(req.params.id);
+        res.json(foundFruit).status(200);
+    } catch (err) {
+        res.status(400).send(err);
     }
 })
 
