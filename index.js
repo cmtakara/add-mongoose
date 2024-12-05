@@ -109,7 +109,14 @@ app.get('/index', (req, res) => {
     )
 })
 
-
+app.get('/fruits', async (req, res) => {
+    try {
+        const foundFruits = await Fruit.find({});
+        res.status(200).render('fruits/Index', { fruits: foundFruits })
+    } catch (err) {
+        res.send(err).status(400);
+    }
+})
 
 // ***** ABOVE HERE are NON-API routes
 
