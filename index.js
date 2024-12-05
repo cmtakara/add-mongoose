@@ -181,48 +181,75 @@ app.get('/fruits/new', (req, res) => {
 // })
 
 // DELETE
-app.delete('/api/fruits/:id', (req, res) => {
-    if (req.params.id >= 0 && req.params.id < fruits.length) {
-        fruits.splice(req.params.id, 1);
-        res.json(fruits);
-    } else {
-        res.send('<p>That is not a valid id</p>')
+app.delete('/api/fruits/:id', async (req, res) => {
+    try {
+        const deletedFruit = await Fruit.findByIdAndDelete(req.params.id);
+        console.log(deletedFruit);
+        res.status(200).redirect('/api/fruits');
+    } catch (err) {
+        res.status(400).send(err);
     }
+
+    // this was all using arrays
+    // if (req.params.id >= 0 && req.params.id < fruits.length) {
+    //     fruits.splice(req.params.id, 1);
+    //     res.json(fruits);
+    // } else {
+    //     res.send('<p>That is not a valid id</p>')
+    // }
 })
 
 // UPDATE
 // put replaces a resource
-app.put('/api/fruits/:id', (req, res) => {
-    if (req.params.id >= 0 && req.params.id < fruits.length) {
-        // put takes the request body and replaces the entire database entry with it
-        // find the id and replace the entire thing with the req.body
+app.put('/api/fruits/:id', async (req, res) => {
         if (req.body.readyToEat === 'on') { // if checked, req.body.readyToEat is set to 'on'
             req.body.readyToEat = true;
         } else { // if not checked, req.body.readyToEat is undefined
             req.body.readyToEat = false;
         }
-        fruits[req.params.id] = req.body;
-        res.json(fruits[req.params.id]);
-    } else {
-        res.send('<p>That is not a valid id</p>')
-    }
+
+        try {
+            const updatedFruit = await Fruit.findByIdAndUpdate(
+                req.params.id,
+                req.body,
+                { new: true },
+            )
+            console.log(updatedFruit);
+            res.redirect('/api/fruits');
+        } catch (err) {
+            res.send(err).status(400);
+        }
+    // if (req.params.id >= 0 && req.params.id < fruits.length) {
+    //     // put takes the request body and replaces the entire database entry with it
+    //     // find the id and replace the entire thing with the req.body
+    //     if (req.body.readyToEat === 'on') { // if checked, req.body.readyToEat is set to 'on'
+    //         req.body.readyToEat = true;
+    //     } else { // if not checked, req.body.readyToEat is undefined
+    //         req.body.readyToEat = false;
+    //     }
+    //     fruits[req.params.id] = req.body;
+    //     res.json(fruits[req.params.id]);
+    // } else {
+    //     res.send('<p>That is not a valid id</p>')
+    // }
 
 })
 
+// we aren't going to use patch
 // patch updates part of it
-app.patch('/api/fruits/:id', (req, res) => {
-    if (req.params.id >= 0 && req.params.id < fruits.length) {
-        // patch only replaces the properties that we give it
-        // find the id and replace only they new properties
-        console.log(fruits[req.params.id]);
-        console.log(req.body)
-        const newFruit = {...fruits[req.params.id], ...req.body}
-        fruits[req.params.id] = newFruit;
-        res.json(fruits[req.params.id]);
-    } else {
-        res.send('<p>That is not a valid id</p>')
-    }
-})
+// app.patch('/api/fruits/:id', (req, res) => {
+//     if (req.params.id >= 0 && req.params.id < fruits.length) {
+//         // patch only replaces the properties that we give it
+//         // find the id and replace only they new properties
+//         console.log(fruits[req.params.id]);
+//         console.log(req.body)
+//         const newFruit = {...fruits[req.params.id], ...req.body}
+//         fruits[req.params.id] = newFruit;
+//         res.json(fruits[req.params.id]);
+//     } else {
+//         res.send('<p>That is not a valid id</p>')
+//     }
+// })
 
 // CREATE
 app.post('/api/fruits', async (req, res) => {
@@ -248,12 +275,19 @@ app.post('/api/fruits', async (req, res) => {
 })
 
 // E - Edit
-app.get('/fruits/:id/edit', (req, res) => {
-    if (req.params.id >= 0 && req.params.id < fruits.length) {
-        res.render('fruits/Edit', { fruit: fruits[req.params.id], id: req.params.id});
-    } else {
-        res.send('<p>That is not a valid id</p>')
+app.get('/fruits/:id/edit', async (req, res) => {
+    try {
+        const foundFruit = await Fruit.findById(req.params.id);
+        res.render('fruits/Edit', { fruit: foundFruit, id: req.params.id});
+    } catch (err) {
+        res.status(400).send(err);
     }
+    // this was with the array
+    // if (req.params.id >= 0 && req.params.id < fruits.length) {
+    //     res.render('fruits/Edit', { fruit: fruits[req.params.id], id: req.params.id});
+    // } else {
+    //     res.send('<p>That is not a valid id</p>')
+    // }
 })
 
 // SHOW
